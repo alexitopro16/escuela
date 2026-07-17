@@ -13,3 +13,5 @@ public class AulaController extends CommonController<AulaRequest, AulaResponse, 
         super(service);
     }
 }
+
+

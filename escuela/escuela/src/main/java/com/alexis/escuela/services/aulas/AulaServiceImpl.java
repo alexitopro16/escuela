@@ -3,13 +3,11 @@ package com.alexis.escuela.services.aulas;
 import com.alexis.escuela.dto.aula.AulaRequest;
 import com.alexis.escuela.dto.aula.AulaResponse;
 import com.alexis.escuela.entities.Aula;
-import com.alexis.escuela.exceptions.EntidadDuplicadaException;
 import com.alexis.escuela.mappers.AulaMapper;
 import com.alexis.escuela.repositories.AulaRepository;
 import com.alexis.escuela.utils.ServiceUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +25,8 @@ public class AulaServiceImpl implements AulaService {
     @Override
     @Transactional(readOnly = true)
     public List<AulaResponse> listar() {
-        return aulaRepository
-                .findAll()
-                .stream()
-                .map(aulaMapper::entidadAResponse)
-                .toList();
+        return aulaRepository.findAll().stream()
+                .map(aulaMapper::entidadAResponse).toList();
     }
 
     @Override
@@ -44,29 +39,31 @@ public class AulaServiceImpl implements AulaService {
     @Override
     public AulaResponse registrar(AulaRequest request) {
         log.info("Registrando aula...");
-        Aula aula = aulaMapper.requestAEntidad(request);
-        try {
-            aulaRepository.save(aula);
-        } catch (DataIntegrityViolationException e) {
-            throw new EntidadDuplicadaException("Ya existe un aula con el nombre: " + request.nombre());
+
+        if (aulaRepository.existsByNombreIgnoreCase(request.nombre())) {
+            throw new IllegalArgumentException("Ya existe un aula con el nombre: " + request.nombre());
         }
+
+        Aula aula = aulaMapper.requestAEntidad(request);
+        aulaRepository.save(aula);
         log.info("Nueva aula {} registrada", aula.getNombre());
         return aulaMapper.entidadAResponse(aula);
     }
 
     @Override
     public AulaResponse actualizar(AulaRequest request, Long id) {
-        Aula aula = ServiceUtils.obtenerEntidadOException(aulaRepository, id, Aula.class);
         log.info("Actualizando aula con id: {}", id);
+
+        if (aulaRepository.existsByNombreIgnoreCaseAndIdNot(request.nombre(), id)) {
+            throw new IllegalArgumentException("Ya existe otro aula con el nombre: " + request.nombre());
+        }
+
+        Aula aula = ServiceUtils.obtenerEntidadOException(aulaRepository, id, Aula.class);
         aula.actualizar(
                 request.nombre(),
                 request.capacidad()
         );
-        try {
-            aulaRepository.save(aula);
-        } catch (DataIntegrityViolationException e) {
-            throw new EntidadDuplicadaException("Ya existe un aula con el nombre: " + request.nombre());
-        }
+        aulaRepository.save(aula);
         log.info("Aula con id: {} actualizada", id);
         return aulaMapper.entidadAResponse(aula);
     }
@@ -77,5 +74,4 @@ public class AulaServiceImpl implements AulaService {
         aulaRepository.delete(aula);
         log.info("Aula con id: {} eliminada", id);
     }
-
 }

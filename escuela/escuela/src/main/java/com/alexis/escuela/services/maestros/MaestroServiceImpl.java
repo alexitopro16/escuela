@@ -25,6 +25,7 @@ public class MaestroServiceImpl implements MaestroService {
     private final MaestroMapper maestroMapper;
     private final GrupoRepository grupoRepository;
 
+    // ... (listar y obtenerPorId se quedan igual) ...
     @Override
     @Transactional(readOnly = true)
     public List<MaestroResponse> listar() {
@@ -43,7 +44,17 @@ public class MaestroServiceImpl implements MaestroService {
     @Override
     public MaestroResponse registrar(MaestroRequest request) {
         log.info("Registrando maestro...");
-        validarDatosUnicos(request);
+
+        // --- 1. VALIDACIÓN PROACTIVA (Lo que pide tu profesor) ---
+        if (maestroRepository.existsByEmailIgnoreCase(request.email())) {
+            throw new IllegalArgumentException("Ya existe un maestro registrado con el email: " + request.email());
+        }
+        if (maestroRepository.existsByTelefono(request.telefono())) {
+            throw new IllegalArgumentException("Ya existe un maestro registrado con el teléfono: " + request.telefono());
+        }
+        // ---------------------------------------------------------
+
+        // 2. Si las validaciones pasan, procedemos a crear y guardar
         Maestro maestro = maestroMapper.requestAEntidad(request);
         maestroRepository.save(maestro);
         log.info("Nuevo maestro {} registrado", maestro.getNombre());
@@ -53,8 +64,18 @@ public class MaestroServiceImpl implements MaestroService {
     @Override
     public MaestroResponse actualizar(MaestroRequest request, Long id) {
         log.info("Actualizando maestro con id: {}", id);
+
+        // --- 1. VALIDACIÓN PROACTIVA PARA ACTUALIZAR ---
+        if (maestroRepository.existsByEmailIgnoreCaseAndIdNot(request.email(), id)) {
+            throw new IllegalArgumentException("Ya existe otro maestro registrado con el email: " + request.email());
+        }
+        if (maestroRepository.existsByTelefonoAndIdNot(request.telefono(), id)) {
+            throw new IllegalArgumentException("Ya existe otro maestro registrado con el teléfono: " + request.telefono());
+        }
+        // -------------------------------------------------
+
+        // 2. Si las validaciones pasan, procedemos a actualizar
         Maestro maestro = ServiceUtils.obtenerEntidadOException(maestroRepository, id, Maestro.class);
-        validarDatosUnicosActualizar(request, id);
         maestro.actualizar(
                 request.nombre(),
                 request.apellidoPaterno(),
@@ -72,28 +93,11 @@ public class MaestroServiceImpl implements MaestroService {
         Maestro maestro = ServiceUtils.obtenerEntidadOException(maestroRepository, id, Maestro.class);
         log.info("Eliminando maestro con id: {}", id);
 
-        if (grupoRepository.existsByMaestroId(id))
+        if (grupoRepository.existsByMaestroId(id)) {
             throw new EntidadRelacionadaException("No se puede eliminar al maestro ya que tiene grupos asignados");
+        }
 
         maestroRepository.delete(maestro);
         log.info("Maestro con id: {} eliminado", id);
-    }
-
-    private void validarDatosUnicos(MaestroRequest request) {
-        log.info("Validando email único...");
-        if (maestroRepository.existsByEmailIgnoreCase(request.email()))
-            throw new IllegalArgumentException("Ya existe un maestro registrado con el email: " + request.email());
-        log.info("Validando teléfono único...");
-        if (maestroRepository.existsByTelefono(request.telefono()))
-            throw new IllegalArgumentException("Ya existe un maestro registrado con el teléfono: " + request.telefono());
-    }
-
-    private void validarDatosUnicosActualizar(MaestroRequest request, Long id) {
-        log.info("Validando cambio en email único...");
-        if (maestroRepository.existsByEmailIgnoreCaseAndIdNot(request.email(), id))
-            throw new IllegalArgumentException("Ya existe un maestro registrado con el email: " + request.email());
-        log.info("Validando cambio en teléfono único...");
-        if (maestroRepository.existsByTelefonoAndIdNot(request.telefono(), id))
-            throw new IllegalArgumentException("Ya existe un maestro registrado con el teléfono: " + request.telefono());
     }
 }
