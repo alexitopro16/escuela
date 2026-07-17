@@ -3,11 +3,10 @@ package com.alexis.escuela.services.cursos;
 import com.alexis.escuela.dto.curso.CursoRequest;
 import com.alexis.escuela.dto.curso.CursoResponse;
 import com.alexis.escuela.entities.Curso;
-// Ya no necesitamos EntidadDuplicadaException ni DataIntegrityViolationException aquí
 import com.alexis.escuela.mappers.CursoMapper;
 import com.alexis.escuela.repositories.CursoRepository;
-import com.alexis.escuela.repositories.GrupoRepository; // Importante para la validación de borrado
-import com.alexis.escuela.exceptions.EntidadRelacionadaException; // Importante para la validación de borrado
+import com.alexis.escuela.repositories.GrupoRepository;
+import com.alexis.escuela.exceptions.EntidadRelacionadaException;
 import com.alexis.escuela.utils.ServiceUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ import java.util.List;
 public class CursoServiceImpl implements CursoService {
 
     private final CursoRepository cursoRepository;
-    private final GrupoRepository grupoRepository; // Añadido para la validación de borrado
+    private final GrupoRepository grupoRepository;
     private final CursoMapper cursoMapper;
 
     @Override
@@ -60,12 +59,10 @@ public class CursoServiceImpl implements CursoService {
     public CursoResponse actualizar(CursoRequest request, Long id) {
         log.info("Actualizando curso con id: {}", id);
 
-        // 1. VALIDACIÓN PROACTIVA PARA ACTUALIZAR
         if (cursoRepository.existsByNombreIgnoreCaseAndIdNot(request.nombre(), id)) {
             throw new IllegalArgumentException("Ya existe otro curso con el nombre: " + request.nombre());
         }
 
-        // 2. Si la validación pasa, actualizamos
         Curso curso = ServiceUtils.obtenerEntidadOException(cursoRepository, id, Curso.class);
         curso.actualizar(
                 request.nombre(),

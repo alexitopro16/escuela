@@ -45,16 +45,13 @@ public class MaestroServiceImpl implements MaestroService {
     public MaestroResponse registrar(MaestroRequest request) {
         log.info("Registrando maestro...");
 
-        // --- 1. VALIDACIÓN PROACTIVA (Lo que pide tu profesor) ---
         if (maestroRepository.existsByEmailIgnoreCase(request.email())) {
             throw new IllegalArgumentException("Ya existe un maestro registrado con el email: " + request.email());
         }
         if (maestroRepository.existsByTelefono(request.telefono())) {
             throw new IllegalArgumentException("Ya existe un maestro registrado con el teléfono: " + request.telefono());
         }
-        // ---------------------------------------------------------
 
-        // 2. Si las validaciones pasan, procedemos a crear y guardar
         Maestro maestro = maestroMapper.requestAEntidad(request);
         maestroRepository.save(maestro);
         log.info("Nuevo maestro {} registrado", maestro.getNombre());
@@ -65,16 +62,13 @@ public class MaestroServiceImpl implements MaestroService {
     public MaestroResponse actualizar(MaestroRequest request, Long id) {
         log.info("Actualizando maestro con id: {}", id);
 
-        // --- 1. VALIDACIÓN PROACTIVA PARA ACTUALIZAR ---
         if (maestroRepository.existsByEmailIgnoreCaseAndIdNot(request.email(), id)) {
             throw new IllegalArgumentException("Ya existe otro maestro registrado con el email: " + request.email());
         }
         if (maestroRepository.existsByTelefonoAndIdNot(request.telefono(), id)) {
             throw new IllegalArgumentException("Ya existe otro maestro registrado con el teléfono: " + request.telefono());
         }
-        // -------------------------------------------------
 
-        // 2. Si las validaciones pasan, procedemos a actualizar
         Maestro maestro = ServiceUtils.obtenerEntidadOException(maestroRepository, id, Maestro.class);
         maestro.actualizar(
                 request.nombre(),

@@ -6,7 +6,7 @@ import com.alexis.escuela.entities.Aula;
 import com.alexis.escuela.entities.Curso;
 import com.alexis.escuela.entities.Grupo;
 import com.alexis.escuela.entities.Maestro;
-import com.alexis.escuela.exceptions.EntidadDuplicadaException; // Importado
+import com.alexis.escuela.exceptions.EntidadDuplicadaException;
 import com.alexis.escuela.mappers.GrupoMapper;
 import com.alexis.escuela.repositories.AulaRepository;
 import com.alexis.escuela.repositories.CursoRepository;
@@ -14,7 +14,7 @@ import com.alexis.escuela.repositories.GrupoRepository;
 import com.alexis.escuela.repositories.MaestroRepository;
 import com.alexis.escuela.utils.ServiceUtils;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException; // Importado
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
