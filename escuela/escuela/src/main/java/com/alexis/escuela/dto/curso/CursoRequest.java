@@ -12,6 +12,6 @@ public record CursoRequest(
 
         @NotNull(message = "Los créditos son requeridos")
         @Min(value = 1, message = "Los créditos mínimos son 1")
-        @Max(value = 2, message = "Los créditos máximos son 10")
+        @Max(value = 10, message = "Los créditos máximos son 10")
         Integer creditos
 ) { }
