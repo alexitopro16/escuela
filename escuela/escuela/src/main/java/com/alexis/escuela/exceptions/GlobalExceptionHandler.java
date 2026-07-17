@@ -69,6 +69,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new CustomErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage()));
     }
+    
+    @ExceptionHandler(EntidadDuplicadaException.class)
+    public ResponseEntity<CustomErrorResponse> handleEntidadDuplicadaException(EntidadDuplicadaException ex) {
+        log.warn("Conflicto por entidad duplicada: {}", ex.getMessage());
+        CustomErrorResponse error = new CustomErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CustomErrorResponse> handleGeneralException(Exception e) {

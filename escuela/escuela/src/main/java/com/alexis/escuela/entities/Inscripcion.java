@@ -41,10 +41,22 @@ public class Inscripcion {
     @OneToOne(mappedBy = "inscripcion")
     private Calificacion calificacion;
 
+    public void actualizar(Alumno alumno, Grupo grupo) {
+        if (alumno == null) {
+            throw new IllegalArgumentException("El alumno no puede ser nulo");
+        }
+        if (grupo == null) {
+            throw new IllegalArgumentException("El grupo no puede ser nulo");
+        }
+        this.alumno = alumno;
+        this.grupo = grupo;
+    }
+
     private void validarDatos(Alumno alumno, Grupo grupo){
         if (alumno == null)
             throw new IllegalArgumentException("El alumno es requerido");
         if (grupo == null)
             throw new IllegalArgumentException("El grupo es requerido");
     }
+
 }

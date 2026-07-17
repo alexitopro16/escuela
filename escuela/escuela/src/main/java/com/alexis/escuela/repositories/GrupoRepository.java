@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GrupoRepository extends JpaRepository<Grupo, Long> {
-    //SELECT COUNT(*) FROM GRUPOS WHERE ID_MAESTRO = ?
-    boolean existsByMaestroId(Long idMaestro);
+
+    boolean existsByMaestroId(Long maestroId);
+
 }
